@@ -1,7 +1,7 @@
 # MCP-Based Agentic Research Assistant for Scientific Literature Analysis
 
 > **Document type:** Complete project architecture, implementation, and execution blueprint  
-> **UI:** Streamlit 
+> **UI:** React
 > **Application/backend:** Python  
 > **Core workflow:** JEV decision-making → MCP literature acquisition → persistent scientific memory → adaptive Hybrid RAG → LLM synthesis → evaluation → second JEV decision
 
@@ -11,7 +11,7 @@
 
 Scientific publications are growing rapidly. Researchers spend substantial time discovering papers, comparing methodologies, reviewing findings, tracing sources, and identifying possible research gaps. A conventional chatbot or basic Retrieval-Augmented Generation (RAG) application may search a fixed corpus or repeatedly retrieve and process similar papers across sessions.
 
-This project proposes an **MCP-Based Agentic Research Assistant** that maintains persistent scientific literature memory and makes evidence-driven decisions about when additional literature is needed. The user submits a research question through a Streamlit interface. An initial JEV decision stage determines whether existing evidence in the persistent database should be reused, supplemented, or expanded. When new literature is required, the system invokes MCP-connected tools for sources such as arXiv and Semantic Scholar. Retrieved paper records and available full text are normalized, deduplicated, parsed, chunked, embedded, and stored for future reuse.
+This project proposes an **MCP-Based Agentic Research Assistant** that maintains persistent scientific literature memory and makes evidence-driven decisions about when additional literature is needed. The user submits a research question through a React interface. The React frontend communicates with the Python backend through an API. An initial JEV decision stage determines whether existing evidence in the persistent database should be reused, supplemented, or expanded. When new literature is required, the system invokes MCP-connected tools for sources such as arXiv and Semantic Scholar. Retrieved paper records and available full text are normalized, deduplicated, parsed, chunked, embedded, and stored for future reuse.
 
 At query time, Hybrid RAG combines dense vector retrieval and keyword retrieval (BM25), merges candidates, reranks them, and builds a citation-aware context. An LLM generates a structured response from that evidence. An evaluator checks relevance, evidence coverage, citation support, and factual consistency. A second JEV decision stage then approves the answer or requests another bounded retrieval/refinement cycle.
 
@@ -30,7 +30,7 @@ Researchers face difficulty keeping up with the increasing volume of scientific 
 **Aim:** Design and develop an agentic scientific research assistant combining persistent literature memory, JEV-based decision-making, MCP-based paper acquisition, adaptive Hybrid RAG, LLM synthesis, and iterative evidence evaluation.
 
 **Objectives**
-1. Accept natural-language scientific questions through Streamlit.
+1. Accept natural-language scientific questions through React.
 2. Maintain persistent storage of papers, chunks, embeddings, and metadata.
 3. Use JEV to decide whether stored evidence is adequate.
 4. Invoke MCP-connected literature sources when more papers are required.
@@ -46,8 +46,8 @@ Researchers face difficulty keeping up with the increasing volume of scientific 
 ## 4. Scope and boundaries
 
 ### Included
-- Streamlit dashboard and research interface.
-- Python backend and modular service layer.
+- React dashboard and research interface.
+- Python API backend and modular service layer.
 - JEV decision-engine integration.
 - MCP tool integration for scholarly sources.
 - Paper metadata collection and document ingestion.
@@ -64,8 +64,8 @@ Knowledge graphs, formal systematic-review compliance, guaranteed access to payw
 
 ```mermaid
 flowchart TD
-    U[Researcher] --> UI[Streamlit Frontend]
-    UI --> B[Python Backend / Controller]
+    U[Researcher] --> UI[React Frontend]
+    UI --> B[Python API Backend / Controller]
     B --> Q[Query Processing]
     Q --> J1[JEV Initial Decision]
     J1 -->|Reuse evidence| DB[(Persistent Scientific Vector DB)]
@@ -96,7 +96,7 @@ flowchart TD
 
 | Component | Responsibility |
 |---|---|
-| Streamlit | Collects queries and displays decisions, evidence, reports, and status. |
+| React | Collects queries and displays decisions, evidence, reports, and status. |
 | Python backend | Coordinates services and controls workflow. |
 | Query processor | Validates and normalizes query and filters. |
 | Initial JEV stage | Decides whether stored evidence should be reused or supplemented. |
@@ -197,7 +197,7 @@ The evaluator returns structured feedback; **JEV makes the next workflow decisio
 Enforce a maximum refinement-cycle count. Track evidence added per cycle. Avoid repeating identical searches without a meaningful query/filter change. Stop when JEV approves, evaluation criteria are met, the cycle limit is reached, or a tool failure prevents progress. If evidence remains insufficient, disclose that limitation.
 
 ### Stage 10 — Report and display
-Assemble the question and filters, summary, literature/methodology comparison, evidence-backed claims, references, limitations, candidate research gaps, retrieval/evaluation summary, and JEV decisions/refinement count where appropriate. Display in Streamlit and add Markdown/PDF/DOCX export as implementation milestones. Preserve citations and source identifiers in exports.
+Assemble the question and filters, summary, literature/methodology comparison, evidence-backed claims, references, limitations, candidate research gaps, retrieval/evaluation summary, and JEV decisions/refinement count where appropriate. Display the result in React and add Markdown/PDF/DOCX export as implementation milestones. Preserve citations and source identifiers in exports.
 
 ## 7. JEV decision engine design
 
@@ -248,11 +248,11 @@ mcp/
 
 Responsibilities: manage server connections, discover tools, validate tool schemas, invoke tools, normalize results, handle pagination/rate limits/timeouts, and preserve source identifiers/URLs. A normalized paper record may contain `paper_id`, `title`, `authors`, `abstract`, `year`, `doi`, `arxiv_id`, `semantic_scholar_id`, `source`, `paper_url`, `pdf_url`, and `full_text_available`. Populate these from actual source responses; do not treat example values as real records.
 
-## 9. Streamlit frontend — user-facing screens
+## 9. React frontend — user-facing screens
 
 The UI should be a research workspace, not only a chat box.
 
-1. **Dashboard:** indexed paper count, chunk count, vector DB status, recent sessions/activity, MCP and LLM connection status. Counts must come from live system data, not hardcoded examples.
+1. **Dashboard:** indexed paper count, chunk count, vector DB status, recent sessions/activity, MCP and LLM connection status. Counts must come from live API data, not hardcoded examples.
 2. **Research Assistant:** query input, year/source/domain filters, analysis type, run button, workflow status, final report, references, and warnings.
 3. **JEV Decision Monitor:** initial decision and explanation, memory reuse/acquisition status, final decision, refinement count, and stop reason. Show a score only if the actual implementation provides one.
 4. **Literature Explorer:** title, authors, year, abstract, source, DOI/arXiv/Semantic Scholar ID, original link, full-text availability, ingestion and deduplication status.
@@ -263,7 +263,7 @@ The UI should be a research workspace, not only a chat box.
 
 ## 10. Backend/service design
 
-Keep business logic outside Streamlit page code. Streamlit can call Python services directly in the first local prototype. Add FastAPI later only if a separate API, multiple clients, or independent deployment is needed.
+Keep business logic outside React components. React should call the Python backend through a documented API. Use FastAPI for the API layer so the frontend and backend can be developed, tested, and deployed independently.
 
 | Module | Responsibility |
 |---|---|
@@ -289,7 +289,22 @@ Create modules incrementally; do not create empty files merely to match this tre
 
 ```text
 mcp-agentic-research-assistant/
-├── app.py                         # Streamlit entry point
+├── frontend/
+│   ├── package.json
+│   ├── vite.config.ts
+│   └── src/
+│       ├── App.tsx
+│       ├── api/
+│       ├── components/
+│       ├── pages/
+│       └── types/
+├── backend/
+│   ├── api.py                     # FastAPI entry point
+│   ├── controller.py
+│   ├── query_service.py
+│   ├── research_service.py
+│   ├── paper_service.py
+│   └── report_service.py
 ├── README.md
 ├── requirements.txt
 ├── pyproject.toml                 # Optional tooling configuration
@@ -298,20 +313,6 @@ mcp-agentic-research-assistant/
 ├── config/
 │   ├── settings.py
 │   └── logging_config.py
-├── frontend/
-│   ├── dashboard.py
-│   ├── research_assistant.py
-│   ├── jev_monitor.py
-│   ├── literature_explorer.py
-│   ├── scientific_memory.py
-│   ├── rag_evaluation.py
-│   └── report_viewer.py
-├── backend/
-│   ├── controller.py
-│   ├── query_service.py
-│   ├── research_service.py
-│   ├── paper_service.py
-│   └── report_service.py
 ├── jev/
 │   ├── interface.py
 │   ├── adapter.py
@@ -378,16 +379,16 @@ mcp-agentic-research-assistant/
     └── test_workflow.py
 ```
 
-`frontend/` is presentation; `backend/` orchestrates; `jev/` isolates the decision model; `mcp/` connects external tools; `ingestion/` prepares documents; `database/` persists data; `retrieval/` performs query-time search; `llm/` generates; `evaluation/` checks; `reports/` formats; `observability/` records traces. Runtime data should normally not be committed to Git.
+`frontend/` contains the React presentation layer; `backend/` exposes the API and orchestrates services; `jev/` isolates the decision model; `mcp/` connects external tools; `ingestion/` prepares documents; `database/` persists data; `retrieval/` performs query-time search; `llm/` generates; `evaluation/` checks; `reports/` formats; `observability/` records traces. Runtime data should normally not be committed to Git.
 
 ## 12. Proposed technology stack
 
 | Layer | Candidate | Purpose |
 |---|---|---|
 | Language | Python | Application and AI workflow. |
-| Frontend | Streamlit | Dashboard and research UI. |
-| Backend | Python modules | Service coordination. |
-| Optional API | FastAPI | Separate API later, if needed. |
+| Frontend | React + Vite + TypeScript | Dashboard and research UI. |
+| Backend | Python modules + FastAPI | API and service coordination. |
+| API communication | REST/JSON (optionally WebSocket/SSE) | Frontend/backend communication and workflow status. |
 | Tool integration | MCP Python SDK | Connect scientific search tools. |
 | Literature | arXiv, Semantic Scholar | Paper discovery and metadata. |
 | PDF parsing | PyMuPDF | Extract accessible PDF text. |
@@ -457,11 +458,17 @@ LOG_LEVEL=INFO
 These are illustrative keys; load only variables actually used. Keep `.env` out of Git.
 
 ### Run application
-After `app.py` and its imports are implemented:
+After the React frontend and FastAPI backend are implemented:
 ```bash
-streamlit run app.py
+cd frontend
+npm install
+npm run dev
 ```
-Open the local URL printed by Streamlit.
+In a second terminal, from the repository root, run the backend:
+```bash
+uvicorn backend.api:app --reload
+```
+Open the frontend URL printed by Vite.
 
 ### Runtime sequence
 1. Activate the virtual environment.
@@ -471,7 +478,7 @@ Open the local URL printed by Streamlit.
 5. Load embedding model.
 6. Initialize LLM provider.
 7. Initialize MCP client(s) and discover configured tools.
-8. Start Streamlit.
+8. Start the FastAPI backend and React development server.
 9. User submits query; backend validates it.
 10. Initial JEV decision runs.
 11. Reuse memory, acquire via MCP, or combine according to mapped decision.
@@ -561,7 +568,7 @@ These are conceptual schemas. Use UUIDs or other collision-resistant identifiers
 
 ## 16. Service contracts
 
-The first version can call Python services directly from Streamlit. Keep boundaries explicit so they can later be exposed through FastAPI.
+The first version exposes Python services through FastAPI endpoints consumed by React. Keep request and response schemas explicit so the API can support additional clients later.
 
 | Operation | Input | Output |
 |---|---|---|
@@ -646,7 +653,7 @@ Use a fixed set of representative research questions and a recorded corpus snaps
 
 ## 22. Development roadmap
 
-**Phase 1 — Foundation:** repository, environment, configuration, logging, Streamlit entry point, health/status view, test setup.
+**Phase 1 — Foundation:** repository, environment, configuration, logging, FastAPI backend, React entry point, health/status view, test setup.
 
 **Phase 2 — Persistence:** paper/chunk/session schemas, vector DB, metadata DB, insert/search/restart/duplicate tests.
 
@@ -662,7 +669,7 @@ Use a fixed set of representative research questions and a recorded corpus snaps
 
 **Phase 8 — Evaluation/reports:** citation validation, evaluation rubric, bounded refinement, structured report/export.
 
-**Phase 9 — UI/hardening:** complete Streamlit screens, diagnostics, security checks, integration/end-to-end tests, baseline experiments.
+**Phase 9 — UI/hardening:** complete React screens, API integration, diagnostics, security checks, integration/end-to-end tests, baseline experiments.
 
 **Phase 10 — Deployment:** persistent storage, secrets, health checks, backups, access controls, monitoring.
 
@@ -680,7 +687,6 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
-.streamlit/secrets.toml
 data/raw/
 data/processed/
 data/indexes/
@@ -692,7 +698,7 @@ logs/
 ```
 Adjust if the repository intentionally contains small, licensed sample data or test fixtures. Do not commit private PDFs, API keys, local vector indexes, or user data.
 
-Suggested branches: `main`, optionally `develop`, and feature branches such as `feature/jev-adapter`, `feature/mcp-integration`, `feature/ingestion`, `feature/hybrid-rag`, `feature/streamlit-ui`, and `feature/evaluation`.
+Suggested branches: `main`, optionally `develop`, and feature branches such as `feature/jev-adapter`, `feature/mcp-integration`, `feature/ingestion`, `feature/hybrid-rag`, `feature/react-ui`, and `feature/evaluation`.
 
 Example commits:
 ```text
@@ -706,9 +712,9 @@ docs: document JEV decision workflow
 
 ## 24. Deployment considerations
 
-**Local prototype:** run Streamlit and Python services in one environment; use persistent local directories; keep secrets in `.env`; keep runtime data outside source control.
+**Local prototype:** run the React development server and FastAPI services locally; use persistent local directories; keep secrets in `.env`; keep runtime data outside source control.
 
-**Shared/production deployment:** use persistent managed storage, PostgreSQL where appropriate, controlled object storage for permitted PDFs, secrets management, authentication/authorization, per-user/API limits, background jobs for long ingestion, backups/recovery, dependency pinning/scanning, concurrency tests, monitoring, and documented retention/copyright compliance. A local Streamlit prototype is not production-ready until these controls are implemented and tested.
+**Shared/production deployment:** use persistent managed storage, PostgreSQL where appropriate, controlled object storage for permitted PDFs, secrets management, authentication/authorization, per-user/API limits, background jobs for long ingestion, backups/recovery, dependency pinning/scanning, concurrency tests, monitoring, and documented retention/copyright compliance. A local React/FastAPI prototype is not production-ready until these controls are implemented and tested.
 
 ## 25. Risks and mitigations
 
@@ -728,11 +734,11 @@ docs: document JEV decision workflow
 
 ## 26. Expected outcome
 
-The intended system will accept scientific questions through Streamlit, reuse indexed literature, use JEV to decide when more evidence is required, acquire supported papers through MCP, avoid unnecessary duplicate indexing, retrieve evidence through Hybrid RAG, generate citation-aware responses with an LLM, evaluate the answer, and use JEV to approve or request bounded refinement. These are project goals; actual performance and improvements must be established through implementation and evaluation.
+The intended system will accept scientific questions through React, reuse indexed literature, use JEV to decide when more evidence is required, acquire supported papers through MCP, avoid unnecessary duplicate indexing, retrieve evidence through Hybrid RAG, generate citation-aware responses with an LLM, evaluate the answer, and use JEV to approve or request bounded refinement. These are project goals; actual performance and improvements must be established through implementation and evaluation.
 
 ## 27. Viva / presentation explanation
 
-“Our project is an MCP-based agentic research assistant for scientific literature analysis. The user submits a research question through a Streamlit interface. Initially, the JEV decision mechanism checks whether the persistent scientific vector database contains sufficient evidence. If additional literature is required, the system uses MCP tools to search sources such as arXiv and Semantic Scholar. New papers are normalized, deduplicated, parsed, chunked, embedded, and stored for future reuse. Hybrid RAG combines semantic vector search and BM25 keyword search, followed by reranking, to retrieve relevant evidence. An LLM uses that evidence to generate a structured research response. An evaluation module checks relevance, evidence coverage, citation support, and consistency. Finally, JEV makes another decision to approve the report or initiate a bounded retrieval/refinement cycle. This approach is designed to reduce repeated paper processing while producing traceable, evidence-supported research outputs.”
+“Our project is an MCP-based agentic research assistant for scientific literature analysis. The user submits a research question through a React interface, which communicates with a FastAPI backend. Initially, the JEV decision mechanism checks whether the persistent scientific vector database contains sufficient evidence. If additional literature is required, the system uses MCP tools to search sources such as arXiv and Semantic Scholar. New papers are normalized, deduplicated, parsed, chunked, embedded, and stored for future reuse. Hybrid RAG combines semantic vector search and BM25 keyword search, followed by reranking, to retrieve relevant evidence. An LLM uses that evidence to generate a structured research response. An evaluation module checks relevance, evidence coverage, citation support, and consistency. Finally, JEV makes another decision to approve the report or initiate a bounded retrieval/refinement cycle. This approach is designed to reduce repeated paper processing while producing traceable, evidence-supported research outputs.”
 
 **Why not only a chatbot?** This project adds persistent literature memory, explicit evidence retrieval, external MCP acquisition, citation traceability, and an evaluation-driven decision loop. Its benefits must be demonstrated with baselines and metrics.
 
