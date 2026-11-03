@@ -1,7 +1,7 @@
 # MCP-Based Agentic Research Assistant for Scientific Literature Analysis
 
 > **Document type:** Complete project architecture, implementation, and execution blueprint  
-> **UI:** Streamlit  
+> **UI:** Streamlit 
 > **Application/backend:** Python  
 > **Core workflow:** JEV decision-making → MCP literature acquisition → persistent scientific memory → adaptive Hybrid RAG → LLM synthesis → evaluation → second JEV decision
 
