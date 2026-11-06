@@ -1,0 +1,55 @@
+MINI-Project: Local Run Instructions
+
+1. Clone the repository and switch to the project branch:
+
+   git clone https://github.com/TatineniUvrdhveswara/MINI-Project.git
+   cd MINI-Project
+   git checkout uvrdhveswara
+
+2. Configure the backend:
+
+   cd backend
+   python -m venv .venv
+   .\.venv\Scripts\Activate.ps1
+   pip install -r requirements.txt
+   Copy-Item .env.example .env
+
+   Add your own GOOGLE_API_KEY and/or GROQ_API_KEY to backend/.env.
+   Never commit backend/.env or share API keys.
+
+3. Start the backend in the backend directory:
+
+   $env:PYTHONPATH = (Get-Location).Path
+   python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+4. In a second terminal, start the frontend:
+
+   cd frontend
+   npm install
+   npm run dev -- --host 0.0.0.0 --port 5173
+
+5. Open the application:
+
+   http://localhost:5173
+
+   Backend API documentation:
+   http://localhost:8000/docs
+
+6. Test the complete workflow:
+
+   - Enter a research question with at least 10 characters.
+   - Click "Run complete research workflow".
+   - Watch the live backend stage updates.
+   - Review retrieved evidence, citations, answer evaluation, and report output.
+   - Review the comparison dashboard after the workflow completes.
+
+7. Run automated tests:
+
+   Backend:
+   cd backend
+   $env:PYTHONPATH = (Get-Location).Path
+   python -m pytest tests -q
+
+   Frontend:
+   cd frontend
+   npm run build

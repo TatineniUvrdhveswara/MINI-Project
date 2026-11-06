@@ -150,7 +150,7 @@ MCP is the tool-integration protocol; it is not the search-ranking algorithm, em
 **4.6 Embeddings:** Generate vectors using one selected embedding model. Use the same compatible model and preprocessing for stored chunks and query embeddings. A possible starting candidate is `BAAI/bge-small-en-v1.5`; validate it on the project corpus before fixing it.
 
 ### Stage 5 — Persistent scientific memory
-The database is the long-term scientific memory and must survive application restarts. A practical local design is ChromaDB for vector storage plus SQLite for canonical paper metadata and workflow records. PostgreSQL can replace SQLite for a larger/shared deployment. Original PDFs, where permitted, can be stored in a controlled local or object-storage directory.
+The database is the long-term scientific memory and must survive application restarts. This project uses ChromaDB for vector storage plus SQLite for canonical paper metadata, chunk records, and workflow records. Original PDFs, where permitted, are stored in the controlled local paper-storage directory.
 
 Responsibilities:
 - Vector DB: chunk embeddings, chunk text, searchable metadata, similarity search.
@@ -394,7 +394,7 @@ mcp-agentic-research-assistant/
 | PDF parsing | PyMuPDF | Extract accessible PDF text. |
 | Embeddings | Sentence Transformers | Convert chunks/queries to vectors. |
 | Vector DB | ChromaDB (initial candidate) | Persistent vector storage/search. |
-| Metadata DB | SQLite initially / PostgreSQL later | Paper and workflow records. |
+| Metadata DB | SQLite | Paper, chunk, and workflow records. |
 | Keyword search | BM25 | Exact-term retrieval. |
 | Reranking | Cross-Encoder candidate | Improve ranking. |
 | Generation | Configurable LLM | Evidence-grounded synthesis. |
@@ -714,7 +714,7 @@ docs: document JEV decision workflow
 
 **Local prototype:** run the React development server and FastAPI services locally; use persistent local directories; keep secrets in `.env`; keep runtime data outside source control.
 
-**Shared/production deployment:** use persistent managed storage, PostgreSQL where appropriate, controlled object storage for permitted PDFs, secrets management, authentication/authorization, per-user/API limits, background jobs for long ingestion, backups/recovery, dependency pinning/scanning, concurrency tests, monitoring, and documented retention/copyright compliance. A local React/FastAPI prototype is not production-ready until these controls are implemented and tested.
+**Shared/production deployment:** use persistent managed storage, controlled object storage for permitted PDFs, secrets management, authentication/authorization, per-user/API limits, background jobs for long ingestion, backups/recovery, dependency pinning/scanning, concurrency tests, monitoring, and documented retention/copyright compliance. A local React/FastAPI prototype is not production-ready until these controls are implemented and tested.
 
 ## 25. Risks and mitigations
 
